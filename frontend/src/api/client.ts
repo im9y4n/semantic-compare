@@ -26,6 +26,7 @@ export interface Stats {
 export const executionsApi = {
     run: (docId?: string) => api.post<{ execution_id: string }>(`/executions/run${docId ? `?document_id=${docId}` : ''}`),
     list: () => api.get<Execution[]>('/executions'),
+    get: (id: string) => api.get<Execution>(`/executions/${id}`),
 };
 
 export const configApi = {

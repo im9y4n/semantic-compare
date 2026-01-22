@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { DocumentList } from './pages/DocumentList';
 import { DocumentDetails } from './pages/DocumentDetails';
 import { ComparisonView } from './pages/ComparisonView';
+import { ExecutionDetails } from './pages/ExecutionDetails';
 import { ExecutionsList } from './pages/ExecutionsList';
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ function App() {
                         <Route path="documents/:id" element={<DocumentDetails />} />
                         <Route path="documents/:id/compare" element={<ComparisonView />} />
                         <Route path="executions" element={<ExecutionsList />} />
+                        <Route path="executions/:id" element={<ExecutionDetails />} /> {/* Added new route */}
                         {/* Add other routes here */}
                     </Route>
                 </Routes>

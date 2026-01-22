@@ -17,13 +17,20 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
         application_name: '',
         document_name: '',
         url: '',
+        keywords: '',
         schedule: 'weekly'
     });
 
     const mutation = useMutation({
         mutationFn: async (data: any) => {
+            // Process keywords
+            const payload = {
+                ...data,
+                keywords: data.keywords ? data.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0) : []
+            };
+
             if (mode === 'url') {
-                return documentsApi.create(data);
+                return documentsApi.create(payload);
             } else {
                 if (!file) throw new Error("No file selected");
 
@@ -36,7 +43,7 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
 
                 // 2. Create Document with internal URL
                 return documentsApi.create({
-                    ...data,
+                    ...payload,
                     url: uploadRes.data.url
                 });
             }
@@ -45,7 +52,7 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
             queryClient.invalidateQueries({ queryKey: ['documents'] });
             queryClient.invalidateQueries({ queryKey: ['stats'] });
             onClose();
-            setFormData({ application_name: '', document_name: '', url: '', schedule: 'weekly' });
+            setFormData({ application_name: '', document_name: '', url: '', keywords: '', schedule: 'weekly' });
             setFile(null);
             alert('Monitor created successfully!');
         },
@@ -164,6 +171,22 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
                         </select>
                     </div>
 
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase">
+                            Keywords <span className="text-xs font-normal lowercase text-slate-400">(optional, comma-separated)</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.keywords}
+                            onChange={e => setFormData({ ...formData, keywords: e.target.value })}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="e.g. immunization, billing, pharmacy"
+                        />
+                        <p className="text-[10px] text-slate-400">
+                            Provide keywords to filter logic. Pages containing these keywords (+/- 2 pages) will be analyzed.
+                        </p>
+                    </div>
+
                     <div className="pt-4 flex justify-end gap-3">
                         <button
                             type="button"
@@ -182,7 +205,7 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };

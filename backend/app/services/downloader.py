@@ -30,8 +30,11 @@ class DocumentDownloader:
                 
                 return content, content_type
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=30) as response:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+            async with aiohttp.ClientSession(headers=headers) as session:
+                async with session.get(url, timeout=60) as response:
                     if response.status != 200:
                         logger.error(f"Failed to download {url}: {response.status}")
                         return None, None
@@ -39,7 +42,7 @@ class DocumentDownloader:
                     content_type = response.headers.get('Content-Type', '').lower()
                     content = await response.read()
                     
-                    if len(content) > 5 * 1024 * 1024: # 5MB limit
+                    if len(content) > 50 * 1024 * 1024: # 50MB limit
                          logger.warning(f"Document {url} exceeds size limit")
                          return None, None
                          

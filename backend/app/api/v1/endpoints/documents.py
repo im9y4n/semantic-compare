@@ -53,6 +53,7 @@ async def create_document(
     if doc:
         # Update existing document
         doc.url = str(doc_in.url)
+        doc.keywords = doc_in.keywords
         doc.schedule = doc_in.schedule
         session.add(doc)
         await session.commit()
@@ -63,6 +64,7 @@ async def create_document(
             application_name=doc_in.application_name,
             name=doc_in.document_name, # Map Pydantic 'document_name' to DB 'name'
             url=str(doc_in.url),
+            keywords=doc_in.keywords,
             schedule=doc_in.schedule
         )
         session.add(doc)

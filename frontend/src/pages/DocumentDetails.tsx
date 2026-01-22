@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { documentsApi } from '../api/client';
 import { ArrowLeft, Database, HardDrive, FileCode, Clock } from 'lucide-react';
@@ -108,13 +108,21 @@ export const DocumentDetails: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="space-y-1">
-                                            <div className="text-xs font-mono text-slate-500 break-all">
-                                                <span className="text-blue-500 font-bold">PDF:</span> {v.gcs_path}
-                                            </div>
+                                        <div className="space-y-2">
                                             <div className="text-xs font-mono text-slate-500 break-all">
                                                 <span className="text-orange-500 font-bold">JSON:</span> {v.extracted_text_path}
                                             </div>
+                                            {v.execution_id && (
+                                                <div>
+                                                    <Link
+                                                        to={`/executions/${v.execution_id}`}
+                                                        className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-medium hover:bg-blue-100 transition-colors"
+                                                    >
+                                                        <Clock className="w-3 h-3" />
+                                                        View Execution Log
+                                                    </Link>
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -130,6 +138,6 @@ export const DocumentDetails: React.FC = () => {
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };

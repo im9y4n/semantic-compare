@@ -7,6 +7,7 @@ class DocumentConfig(BaseModel):
     application_name: str
     document_name: str
     url: str # Allow internal:// scheme
+    keywords: Optional[List[str]] = []
     schedule: Optional[str] = "weekly"
 
 class ConfigImport(BaseModel):
@@ -17,6 +18,7 @@ class DocumentResponse(BaseModel):
     application_name: str
     name: str # map 'document_name' or just 'name' from DB
     url: str
+    keywords: Optional[List[str]] = []
     schedule: Optional[str]
     created_at: Optional[Any] = None
 
@@ -43,6 +45,7 @@ class ExecutionSchema(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     logs: Optional[str] = None
+    steps: Optional[List[dict]] = []
 
     class Config:
         from_attributes = True

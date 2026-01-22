@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { executionsApi } from '../api/client';
 import { Activity, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -16,33 +17,37 @@ export const ExecutionsList: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden">
                 <div className="divide-y divide-slate-50">
                     {executions?.map((exec) => (
-                        <div key={exec.id} className="p-6 hover:bg-slate-50 transition-colors flex items-center justify-between">
-                            <div className="flex items-start gap-4">
-                                <div className={`p-2 rounded-lg mt-1 ${exec.status === 'completed' ? 'bg-emerald-50 text-emerald-600' :
-                                        exec.status === 'failed' ? 'bg-red-50 text-red-600' :
-                                            'bg-amber-50 text-amber-600 animate-pulse'
-                                    }`}>
-                                    {exec.status === 'completed' ? <CheckCircle className="w-5 h-5" /> :
-                                        exec.status === 'failed' ? <AlertTriangle className="w-5 h-5" /> :
-                                            <Activity className="w-5 h-5" />}
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">{exec.status}</h3>
-                                    <p className="text-xs text-slate-500 mt-1 font-mono">{exec.id}</p>
-                                </div>
-                            </div>
+                        <div key={exec.id}>
+                            <Link to={`/executions/${exec.id}`} className="block p-6 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-start gap-4">
+                                        <div className={`p-2 rounded-lg mt-1 ${exec.status === 'completed' ? 'bg-emerald-50 text-emerald-600' :
+                                            exec.status === 'failed' ? 'bg-red-50 text-red-600' :
+                                                'bg-amber-50 text-amber-600 animate-pulse'
+                                            }`}>
+                                            {exec.status === 'completed' ? <CheckCircle className="w-5 h-5" /> :
+                                                exec.status === 'failed' ? <AlertTriangle className="w-5 h-5" /> :
+                                                    <Activity className="w-5 h-5" />}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">{exec.status}</h3>
+                                            <p className="text-xs text-slate-500 mt-1 font-mono">{exec.id}</p>
+                                        </div>
+                                    </div>
 
-                            <div className="text-right">
-                                <div className="flex items-center text-sm text-slate-600 justify-end">
-                                    <Clock className="w-4 h-4 mr-2 text-slate-400" />
-                                    {format(new Date(exec.start_time), 'MMM d, yyyy HH:mm:ss')}
+                                    <div className="text-right">
+                                        <div className="flex items-center text-sm text-slate-600 justify-end">
+                                            <Clock className="w-4 h-4 mr-2 text-slate-400" />
+                                            {format(new Date(exec.start_time), 'MMM d, yyyy HH:mm:ss')}
+                                        </div>
+                                        {exec.end_time && (
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                Duration: {((new Date(exec.end_time).getTime() - new Date(exec.start_time).getTime()) / 1000).toFixed(1)}s
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                                {exec.end_time && (
-                                    <p className="text-xs text-slate-400 mt-1">
-                                        Duration: {((new Date(exec.end_time).getTime() - new Date(exec.start_time).getTime()) / 1000).toFixed(1)}s
-                                    </p>
-                                )}
-                            </div>
+                            </Link>
                         </div>
                     ))}
                     {executions?.length === 0 && (

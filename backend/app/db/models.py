@@ -22,6 +22,7 @@ class Document(Base):
     name: Mapped[str] = mapped_column(String, index=True)
     url: Mapped[str] = mapped_column(String)
     schedule: Mapped[Optional[str]] = mapped_column(String, default="weekly")
+    keywords: Mapped[Optional[List[str]]] = mapped_column(JSONB, default=[])
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     versions: Mapped[List["Version"]] = relationship("Version", back_populates="document", cascade="all, delete-orphan")
@@ -52,5 +53,6 @@ class Execution(Base):
     start_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     end_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     logs: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    steps: Mapped[Optional[List[dict]]] = mapped_column(JSONB, default=[])
     
     versions: Mapped[List["Version"]] = relationship("Version", back_populates="execution")

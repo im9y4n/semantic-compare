@@ -3,8 +3,9 @@ from fastapi import Depends, HTTPException, status
 from app.core.security import User, Role, get_current_user
 from app.db.session import AsyncSessionLocal
 
-def get_session():
-    return AsyncSessionLocal()
+async def get_session():
+    async with AsyncSessionLocal() as session:
+        yield session
 
 class RoleChecker:
     def __init__(self, allowed_roles: List[Role]):

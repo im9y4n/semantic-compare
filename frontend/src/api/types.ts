@@ -15,11 +15,21 @@ export interface Version {
     gcs_path: string;
 }
 
+export interface ExecutionStep {
+    name: string;
+    status: 'pending' | 'running' | 'completed' | 'failed';
+    start_time?: string;
+    end_time?: string;
+    details?: string;
+}
+
 export interface Execution {
     id: string;
     status: 'pending' | 'running' | 'completed' | 'failed';
     start_time: string;
     end_time?: string;
+    logs?: string;
+    steps?: ExecutionStep[];
 }
 
 export interface ConfigImport {

@@ -50,3 +50,14 @@ async def list_executions(
     stmt = select(Execution).order_by(desc(Execution.start_time)).offset(skip).limit(limit)
     result = await session.execute(stmt)
     return result.scalars().all()
+
+@router.get("/{id}", response_model=ExecutionSchema)
+async def get_execution(
+    id: uuid.UUID,
+    session: AsyncSession = Depends(deps.get_session)
+):
+    execution = await session.get(Execution, id)
+    if not execution:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Execution not found")
+    return execution
