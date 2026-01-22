@@ -94,7 +94,7 @@ export const DocumentList: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                                     <RunButton docId={doc.id} />
-                                    <DeleteButton docId={doc.id} onSuccess={() => window.location.reload()} />
+                                    <DeleteButton docId={doc.id} ownerId={doc.owner_id} onSuccess={() => window.location.reload()} />
                                     <ButtonLink to={`/documents/${doc.id}/compare`}>
                                         <GitCompare className="w-4 h-4" />
                                     </ButtonLink>
@@ -121,7 +121,7 @@ import { executionsApi } from '../api/client';
 
 const RunButton = ({ docId }: { docId: string }) => {
     const role = localStorage.getItem('user_role') || 'admin';
-    const canRun = ['admin', 'manager'].includes(role);
+    const canRun = ['admin', 'manager', 'owner'].includes(role);
 
     const mutation = useMutation({
         mutationFn: () => executionsApi.run(docId),
@@ -148,9 +148,13 @@ const RunButton = ({ docId }: { docId: string }) => {
 }
 
 import { Trash2 } from 'lucide-react';
-const DeleteButton = ({ docId, onSuccess }: { docId: string, onSuccess: () => void }) => {
+const DeleteButton = ({ docId, ownerId, onSuccess }: { docId: string, ownerId?: string, onSuccess: () => void }) => {
     const role = localStorage.getItem('user_role') || 'admin';
-    const canDelete = role === 'admin';
+
+    // Mock user ID logic to match backend Mock
+    const currentUserId = `user-${role}`; // e.g. user-admin, user-owner, user-manager
+
+    const canDelete = role === 'admin' || (['manager', 'owner'].includes(role) && ownerId === currentUserId);
 
     const mutation = useMutation({
         mutationFn: () => documentsApi.delete(docId),

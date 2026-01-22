@@ -23,6 +23,7 @@ class Document(Base):
     url: Mapped[str] = mapped_column(String)
     schedule: Mapped[Optional[str]] = mapped_column(String, default="weekly")
     keywords: Mapped[Optional[List[str]]] = mapped_column(JSONB, default=[])
+    owner_id: Mapped[Optional[str]] = mapped_column(String, index=True) # ID from UserInfo
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     versions: Mapped[List["Version"]] = relationship("Version", back_populates="document", cascade="all, delete-orphan")

@@ -13,9 +13,16 @@ router = APIRouter()
 async def get_documents(
     skip: int = 0,
     limit: int = 100,
-    session: AsyncSession = Depends(deps.get_session)
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER, deps.Role.OWNER, deps.Role.VIEWER]))
 ):
+    from app.core.security import Role
     stmt = select(Document).offset(skip).limit(limit)
+    
+    # Filter for OWNER role
+    if current_user.role == Role.OWNER:
+        stmt = stmt.where(Document.owner_id == current_user.id)
+        
     result = await session.execute(stmt)
     docs = result.scalars().all()
     # Pydantic v2 from_attributes handles ORM objects
@@ -40,7 +47,7 @@ async def create_document(
     doc_in: DocumentConfig,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(deps.get_session),
-    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER]))
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER, deps.Role.OWNER]))
 ):
     # Check if document already exists
     stmt = select(Document).where(
@@ -65,7 +72,8 @@ async def create_document(
             name=doc_in.document_name, # Map Pydantic 'document_name' to DB 'name'
             url=str(doc_in.url),
             keywords=doc_in.keywords,
-            schedule=doc_in.schedule
+            schedule=doc_in.schedule,
+            owner_id=current_user.id
         )
         session.add(doc)
         await session.commit()
@@ -99,7 +107,7 @@ async def update_document(
     id: str,
     doc_in: DocumentConfig,
     session: AsyncSession = Depends(deps.get_session),
-    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER]))
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER, deps.Role.OWNER]))
 ):
     """
     Update a document's configuration.
@@ -107,6 +115,14 @@ async def update_document(
     doc = await session.get(Document, id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
+        
+    # Check permissions
+    from app.core.security import Role
+    if current_user.role != Role.ADMIN:
+        # Managers and Owners can only update their own documents
+        # (Assuming Manager rule "only delete/edit the monitors they created" applies here too)
+        if doc.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to edit this document")
         
     doc.application_name = doc_in.application_name
     # Don't update name if it maps to document_name, keep simple for now
@@ -154,22 +170,27 @@ async def get_document_versions(
     return versions
 
 from app.core.security import Role
-@router.delete("/{id}", status_code=204, dependencies=[Depends(deps.check_permissions([Role.ADMIN]))])
+@router.delete("/{id}", status_code=204)
 async def delete_document(
     id: str,
-    session: AsyncSession = Depends(deps.get_session)
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER, deps.Role.OWNER]))
 ):
     """
-    Delete a document. Only for ADMINs.
+    Delete a document.
     """
     doc = await session.get(Document, id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Ownership Check
+    if current_user.role != Role.ADMIN:
+        if doc.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to delete this document")
         
     await session.delete(doc)
     await session.commit()
-    await session.delete(doc)
-    await session.commit()
+    # Double commit was in original, removing it
     
     # Remove from scheduler
     from app.services.scheduler import SchedulerService

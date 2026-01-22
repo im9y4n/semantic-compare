@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     AD_GROUP_MAPPING: dict = {
         "CN=GraphIntell_Admins,OU=Groups,DC=example,DC=com": "admin",
         "CN=GraphIntell_Managers,OU=Groups,DC=example,DC=com": "manager",
+        "CN=GraphIntell_Owners,OU=Groups,DC=example,DC=com": "owner",
         "CN=GraphIntell_Users,OU=Groups,DC=example,DC=com": "viewer"
     }
 

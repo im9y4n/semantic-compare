@@ -16,11 +16,15 @@ export default {
                     900: '#0f172a', // Darker
                 },
                 primary: {
-                    50: '#f0f9ff',
-                    100: '#e0f2fe',
-                    500: '#0ea5e9', // Sky blue
-                    600: '#0284c7',
-                    700: '#0369a1',
+                    50: '#f0f7ff',
+                    100: '#e0effe',
+                    500: '#0071DC', // Walmart Blue
+                    600: '#004f9a', // Darker Blue
+                    700: '#003d7a',
+
+                    // Accents
+                    warning: '#FFC220', // Spark Yellow
+                    dark: '#2E2F32'
                 }
             },
             boxShadow: {

@@ -52,6 +52,11 @@ async def get_current_user(
                  "sub": "user-manager", 
                  "groups": ["CN=GraphIntell_Managers,OU=Groups,DC=example,DC=com"]
              }
+        elif token == "owner":
+             user_info = {
+                 "sub": "user-owner", 
+                 "groups": ["CN=GraphIntell_Owners,OU=Groups,DC=example,DC=com"]
+             }
         elif token == "viewer":
              user_info = {
                  "sub": "user-viewer", 
@@ -98,6 +103,8 @@ async def get_current_user(
                     break # Admin is highest
                 if new_role == Role.MANAGER and assigned_role != Role.ADMIN:
                     assigned_role = Role.MANAGER
+                if new_role == Role.OWNER and assigned_role not in [Role.ADMIN, Role.MANAGER]:
+                    assigned_role = Role.OWNER
             except ValueError:
                 pass
                 

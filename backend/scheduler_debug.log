@@ -185,3 +185,81 @@
 [2026-01-22 00:46:53.139289] Heartbeat: Alive
 [2026-01-22 00:47:53.121883] Heartbeat: Alive
 [2026-01-22 00:48:53.120072] Heartbeat: Alive
+[2026-01-22 00:49:53.123326] Heartbeat: Alive
+[2026-01-22 00:50:00.014918] Triggering scheduled pipeline for doc 6d00efb2-ff87-4201-aae6-0c0a6c5542f0
+[2026-01-22 00:50:00.015397] Generated Execution ID: e0df4d0d-e33e-479b-8728-e1f41a1b068e
+[2026-01-22 00:50:53.121934] Heartbeat: Alive
+[2026-01-22 00:51:53.122025] Heartbeat: Alive
+[2026-01-22 00:52:53.121289] Heartbeat: Alive
+[2026-01-22 00:53:53.121480] Heartbeat: Alive
+[2026-01-22 00:54:53.120626] Heartbeat: Alive
+[2026-01-22 00:55:00.004185] Triggering scheduled pipeline for doc 6d00efb2-ff87-4201-aae6-0c0a6c5542f0
+[2026-01-22 00:55:00.005013] Generated Execution ID: f88b1e30-2864-4351-9169-a4fc12934cbc
+[2026-01-22 00:55:53.123337] Heartbeat: Alive
+[2026-01-22 00:56:53.119805] Heartbeat: Alive
+[2026-01-22 00:57:53.121397] Heartbeat: Alive
+[2026-01-22 00:58:53.120669] Heartbeat: Alive
+[2026-01-22 00:59:53.122940] Heartbeat: Alive
+[2026-01-22 01:00:00.004351] Triggering scheduled pipeline for doc 6d00efb2-ff87-4201-aae6-0c0a6c5542f0
+[2026-01-22 01:00:00.005790] Generated Execution ID: 43c4e11d-8428-401c-9357-12ce43b78b0b
+[2026-01-22 01:00:53.121810] Heartbeat: Alive
+[2026-01-22 01:01:53.120898] Heartbeat: Alive
+[2026-01-22 01:02:53.120704] Heartbeat: Alive
+[2026-01-22 01:03:53.120870] Heartbeat: Alive
+[2026-01-22 01:04:07.700371] Successfully scheduled job for doc ffa167f2-470d-4ebd-ae77-88c46593726f with schedule '0 0 * * 0'
+[2026-01-22 01:04:07.700835] Job ffa167f2-470d-4ebd-ae77-88c46593726f confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 01:04:53.120205] Heartbeat: Alive
+[2026-01-22 01:05:00.002731] Triggering scheduled pipeline for doc 6d00efb2-ff87-4201-aae6-0c0a6c5542f0
+[2026-01-22 01:05:00.003334] Generated Execution ID: d8c87888-ae63-4eac-af03-f2c474f11346
+[2026-01-22 01:05:53.120634] Heartbeat: Alive
+[2026-01-22 07:36:45.125701] Scheduler started
+[2026-01-22 07:36:45.126061] Heartbeat job added
+[2026-01-22 07:36:45.126097] Loading scheduled jobs from database...
+[2026-01-22 07:36:45.160657] Successfully scheduled job for doc 6d00efb2-ff87-4201-aae6-0c0a6c5542f0 with schedule '*/5 * * * *'
+[2026-01-22 07:36:45.160735] Job 6d00efb2-ff87-4201-aae6-0c0a6c5542f0 confirmed. Next run: 2026-01-22 07:40:00-06:00
+[2026-01-22 07:36:45.160906] Successfully scheduled job for doc ffa167f2-470d-4ebd-ae77-88c46593726f with schedule '0 0 * * 0'
+[2026-01-22 07:36:45.160941] Job ffa167f2-470d-4ebd-ae77-88c46593726f confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 07:36:45.160970] Loaded 2 scheduled jobs.
+[2026-01-22 07:37:45.126766] Heartbeat: Alive
+[2026-01-22 07:38:45.127724] Heartbeat: Alive
+[2026-01-22 07:52:45.127433] Heartbeat: Alive
+[2026-01-22 07:53:45.128166] Heartbeat: Alive
+[2026-01-22 07:55:17.274147] Scheduler started
+[2026-01-22 07:55:17.274670] Heartbeat job added
+[2026-01-22 07:55:17.274705] Loading scheduled jobs from database...
+[2026-01-22 07:55:17.318398] Successfully scheduled job for doc 6d00efb2-ff87-4201-aae6-0c0a6c5542f0 with schedule '*/5 * * * *'
+[2026-01-22 07:55:17.318479] Job 6d00efb2-ff87-4201-aae6-0c0a6c5542f0 confirmed. Next run: 2026-01-22 08:00:00-06:00
+[2026-01-22 07:55:17.318649] Successfully scheduled job for doc ffa167f2-470d-4ebd-ae77-88c46593726f with schedule '0 0 * * 0'
+[2026-01-22 07:55:17.318694] Job ffa167f2-470d-4ebd-ae77-88c46593726f confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 07:55:17.318728] Loaded 2 scheduled jobs.
+[2026-01-22 07:55:17.494226] Successfully scheduled job for doc 96de7aac-dd1a-4c06-9b46-58fada83928a with schedule '0 0 * * 0'
+[2026-01-22 07:55:17.494316] Job 96de7aac-dd1a-4c06-9b46-58fada83928a confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 07:55:46.195589] Successfully scheduled job for doc e93f52f0-975e-4b95-b50c-03133c1cfce5 with schedule '0 0 * * 0'
+[2026-01-22 07:55:46.196210] Job e93f52f0-975e-4b95-b50c-03133c1cfce5 confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 07:56:17.274872] Heartbeat: Alive
+[2026-01-22 07:57:17.276173] Heartbeat: Alive
+[2026-01-22 07:57:24.062222] Scheduler started
+[2026-01-22 07:57:24.062479] Heartbeat job added
+[2026-01-22 07:57:24.062513] Loading scheduled jobs from database...
+[2026-01-22 07:57:24.099211] Loaded 0 scheduled jobs.
+[2026-01-22 07:57:45.046371] Scheduler started
+[2026-01-22 07:57:45.046773] Heartbeat job added
+[2026-01-22 07:57:45.046813] Loading scheduled jobs from database...
+[2026-01-22 07:57:45.085672] Loaded 0 scheduled jobs.
+[2026-01-22 08:00:34.166416] Scheduler started
+[2026-01-22 08:00:34.166766] Heartbeat job added
+[2026-01-22 08:00:34.166801] Loading scheduled jobs from database...
+[2026-01-22 08:00:34.207024] Loaded 0 scheduled jobs.
+[2026-01-22 08:00:34.382111] Successfully scheduled job for doc a5f4af90-822f-4651-803d-1a6fdeca22f1 with schedule '0 0 * * 0'
+[2026-01-22 08:00:34.382210] Job a5f4af90-822f-4651-803d-1a6fdeca22f1 confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 08:01:09.280546] Successfully scheduled job for doc fd6bda80-7eda-4441-987a-9328d41f407e with schedule '0 0 * * 0'
+[2026-01-22 08:01:09.281212] Job fd6bda80-7eda-4441-987a-9328d41f407e confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 08:01:34.168664] Heartbeat: Alive
+[2026-01-22 08:01:36.868840] Successfully scheduled job for doc 5caeffa7-b233-497d-b662-8e793843c73f with schedule '0 0 * * 0'
+[2026-01-22 08:01:36.869147] Job 5caeffa7-b233-497d-b662-8e793843c73f confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 08:02:34.167762] Heartbeat: Alive
+[2026-01-22 08:03:34.169006] Heartbeat: Alive
+[2026-01-22 08:04:34.167701] Heartbeat: Alive
+[2026-01-22 08:05:34.167273] Heartbeat: Alive
+[2026-01-22 08:06:34.168721] Heartbeat: Alive
+[2026-01-22 08:07:34.168642] Heartbeat: Alive

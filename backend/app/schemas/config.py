@@ -20,6 +20,7 @@ class DocumentResponse(BaseModel):
     url: str
     keywords: Optional[List[str]] = []
     schedule: Optional[str]
+    owner_id: Optional[str] = None
     created_at: Optional[Any] = None
     latest_execution_id: Optional[UUID] = None
 

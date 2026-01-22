@@ -9,6 +9,7 @@ import { ComparisonView } from './pages/ComparisonView';
 import { ExecutionDetails } from './pages/ExecutionDetails';
 import { ExecutionsList } from './pages/ExecutionsList';
 import { KeywordHighlights } from './pages/KeywordHighlights';
+import { Settings } from './pages/Settings';
 
 const queryClient = new QueryClient();
 
@@ -21,9 +22,10 @@ function App() {
                         <Route index element={<Dashboard />} />
                         <Route path="documents" element={<DocumentList />} />
                         <Route path="documents/:id" element={<DocumentDetails />} />
-                        <Route path="documents/:id/versions/:versionId/matches" element={<KeywordHighlights />} />
                         <Route path="documents/:id/compare" element={<ComparisonView />} />
+                        <Route path="versions/:id/matches" element={<KeywordHighlights />} />
                         <Route path="executions" element={<ExecutionsList />} />
+                        <Route path="settings" element={<Settings />} />
                         <Route path="executions/:id" element={<ExecutionDetails />} /> {/* Added new route */}
                         {/* Add other routes here */}
                     </Route>

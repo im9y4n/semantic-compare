@@ -6,6 +6,7 @@ export interface Document {
     url: string;
     schedule: string;
     keywords?: string[];
+    owner_id?: string;
     created_at: string;
 }
 

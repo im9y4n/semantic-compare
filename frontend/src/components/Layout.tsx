@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Settings, Activity, Plus, File, Clock } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings, Activity, Plus, File, Clock, Sparkles } from 'lucide-react';
 import { NewMonitorModal } from './NewMonitorModal';
 
 export const Layout: React.FC = () => {
@@ -12,12 +12,12 @@ export const Layout: React.FC = () => {
     const NavItem = ({ to, icon: Icon, label }: { to: string, icon: any, label: string }) => (
         <Link
             to={to}
-            className={`flex items-center px-3 py-3 mx-2 rounded-lg text-sm font-medium transition-colors ${isActive(to)
-                ? 'bg-slate-200 text-slate-900'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            className={`flex items-center px-4 py-3 mx-1 rounded-full text-sm font-medium transition-colors ${isActive(to)
+                ? 'bg-primary-50 text-primary-700'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
         >
-            <Icon className="w-5 h-5 mr-3" strokeWidth={2} />
+            <Icon className={`w-5 h-5 mr-3 ${isActive(to) ? 'text-primary-500' : 'text-slate-400'}`} strokeWidth={2} />
             {label}
         </Link>
     );
@@ -26,25 +26,32 @@ export const Layout: React.FC = () => {
         <div className="flex h-screen bg-white">
             <NewMonitorModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-            {/* Sidebar - ChatGPT Style */}
-            <div className="w-[260px] bg-slate-50 border-r flex flex-col h-full flex-shrink-0">
+            {/* Sidebar - Walmart Style */}
+            <div className="w-[260px] bg-white border-r flex flex-col h-full flex-shrink-0">
 
-                {/* New Chat / Action Button Area */}
-                <div className="p-3">
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="w-full flex items-center gap-2 px-4 py-3 border border-slate-200 rounded-lg hover:bg-white transition-colors shadow-sm bg-white text-slate-700 mb-4"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span className="text-sm font-medium">New Monitor</span>
-                    </button>
+                {/* Brand Header */}
+                <div className="h-16 flex items-center pl-5 border-b justify-start w-full">
+                    <div className="flex items-center gap-3 font-bold text-primary-600 text-lg tracking-tight">
+                        <Sparkles className="w-6 h-6 text-[#FFC220] fill-current" />
+                        <span>Controls DocuDiff</span>
+                    </div>
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 space-y-1 overflow-y-auto px-1">
-                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        Platform
+                {/* New Chat / Action Button Area - Hidden for Viewers */}
+                {localStorage.getItem('user_role') !== 'viewer' && (
+                    <div className="p-4">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-full transition-colors shadow-sm font-medium"
+                        >
+                            <Plus className="w-5 h-5" />
+                            <span>New Monitor</span>
+                        </button>
                     </div>
+                )}
+
+                {/* Navigation */}
+                <nav className="flex-1 space-y-1 overflow-y-auto px-2 mt-2">
                     <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
                     <NavItem to="/documents" icon={FileText} label="Documents" />
                     <NavItem to="/executions" icon={Activity} label="Executions" />
