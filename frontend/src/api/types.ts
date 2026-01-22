@@ -32,6 +32,12 @@ export interface Execution {
     end_time?: string;
     logs?: string;
     steps?: ExecutionStep[];
+    targets?: {
+        id: string;
+        application_name: string;
+        document_name: string;
+        url: string;
+    }[];
 }
 
 export interface ConfigImport {

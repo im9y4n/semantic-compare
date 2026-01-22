@@ -50,3 +50,30 @@
 [2026-01-22 00:21:21.725951] Heartbeat: Alive
 [2026-01-22 00:22:00.006066] Triggering scheduled pipeline for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636
 [2026-01-22 00:22:00.006401] Generated Execution ID: 02a370f5-c9a8-4b16-87f6-bc5118149f21
+[2026-01-22 00:22:21.735352] Heartbeat: Alive
+[2026-01-22 00:23:00.027951] Triggering scheduled pipeline for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636
+[2026-01-22 00:23:00.028900] Generated Execution ID: a942353c-3001-45c5-80d0-59f8b4615c18
+[2026-01-22 00:23:21.728804] Heartbeat: Alive
+[2026-01-22 00:24:00.004630] Triggering scheduled pipeline for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636
+[2026-01-22 00:24:00.006220] Generated Execution ID: 23860b18-de7f-47dd-843f-4fd58535ab6b
+[2026-01-22 00:24:21.726601] Heartbeat: Alive
+[2026-01-22 00:25:00.003657] Triggering scheduled pipeline for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636
+[2026-01-22 00:25:00.004705] Generated Execution ID: 34287384-1792-452c-9cfd-5c40ebfdbaa9
+[2026-01-22 00:25:20.373318] Scheduler started
+[2026-01-22 00:25:20.373710] Heartbeat job added
+[2026-01-22 00:25:20.373746] Loading scheduled jobs from database...
+[2026-01-22 00:25:20.420074] Successfully scheduled job for doc 2a145025-0f23-4cd5-8c88-dc1d3b039b3f with schedule '0 0 * * 0'
+[2026-01-22 00:25:20.420203] Job 2a145025-0f23-4cd5-8c88-dc1d3b039b3f confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 00:25:20.420487] Successfully scheduled job for doc cd1a947a-4254-4ce0-a2ae-2cbe27f64c9f with schedule '0 0 * * 0'
+[2026-01-22 00:25:20.420538] Job cd1a947a-4254-4ce0-a2ae-2cbe27f64c9f confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 00:25:20.420668] Successfully scheduled job for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636 with schedule '* * * * *'
+[2026-01-22 00:25:20.420718] Job 24ebe71f-e83f-4e2d-867d-e1c37e37f636 confirmed. Next run: 2026-01-22 00:26:00-06:00
+[2026-01-22 00:25:20.420760] Loaded 3 scheduled jobs.
+[2026-01-22 00:26:00.004649] Triggering scheduled pipeline for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636
+[2026-01-22 00:26:00.005449] Generated Execution ID: 0a07b4c6-f150-4cbb-85d7-307f23dcc70d
+[2026-01-22 00:26:20.375775] Heartbeat: Alive
+[2026-01-22 00:27:00.006079] Triggering scheduled pipeline for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636
+[2026-01-22 00:27:00.006570] Generated Execution ID: 74bd4c97-85c9-4f86-bb31-14d9711b8ac6
+[2026-01-22 00:27:10.088856] Successfully scheduled job for doc 24ebe71f-e83f-4e2d-867d-e1c37e37f636 with schedule '0 0 * * 0'
+[2026-01-22 00:27:10.114063] Job 24ebe71f-e83f-4e2d-867d-e1c37e37f636 confirmed. Next run: 2026-01-26 00:00:00-06:00
+[2026-01-22 00:27:20.376134] Heartbeat: Alive

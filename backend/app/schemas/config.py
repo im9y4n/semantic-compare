@@ -40,6 +40,12 @@ class VersionSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class ExecutionTarget(BaseModel):
+    id: UUID
+    application_name: str
+    document_name: str
+    url: str
+
 class ExecutionSchema(BaseModel):
     id: UUID
     status: str
@@ -47,6 +53,7 @@ class ExecutionSchema(BaseModel):
     end_time: Optional[datetime] = None
     logs: Optional[str] = None
     steps: Optional[List[dict]] = []
+    targets: Optional[List[ExecutionTarget]] = []
 
     class Config:
         from_attributes = True

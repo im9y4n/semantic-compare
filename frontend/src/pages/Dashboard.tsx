@@ -96,7 +96,7 @@ export const Dashboard: React.FC = () => {
                                             exec.status === 'failed' ? <AlertTriangle className="w-5 h-5" /> :
                                                 <Activity className="w-5 h-5" />}
                                     </div>
-                                    <div>
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold text-slate-700 capitalize group-hover:text-blue-600 transition-colors">
                                                 {exec.status}
@@ -105,14 +105,28 @@ export const Dashboard: React.FC = () => {
                                                 {exec.id.substring(0, 8)}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                                            <Clock className="w-3 h-3" />
-                                            <span>
-                                                {new Date(exec.start_time).toLocaleString(undefined, {
-                                                    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
-                                                })}
-                                            </span>
-                                        </div>
+
+                                        {/* Targets Display */}
+                                        {exec.targets && exec.targets.length > 0 ? (
+                                            <div className="mt-1 flex flex-wrap gap-2">
+                                                {exec.targets.map(t => (
+                                                    <div key={t.id} className="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                                        <span className="font-medium text-slate-800">{t.application_name}</span>
+                                                        <span className="text-slate-400">•</span>
+                                                        <span className="truncate max-w-[150px]">{t.document_name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                                                <Clock className="w-3 h-3" />
+                                                <span>
+                                                    {new Date(exec.start_time).toLocaleString(undefined, {
+                                                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -136,33 +150,35 @@ export const Dashboard: React.FC = () => {
                 </div>
             </div>
             {/* Run Success Modal */}
-            {runSuccessId && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center transform transition-all scale-100">
-                        <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
-                        </div>
-                        <h3 className="text-lg font-bold text-slate-800 mb-2">Execution Started!</h3>
-                        <p className="text-sm text-slate-500 mb-6">
-                            The analysis pipeline has been triggered successfully.
-                        </p>
-                        <div className="flex gap-3 justify-center">
-                            <button
-                                onClick={() => setRunSuccessId(null)}
-                                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
-                            >
-                                Close
-                            </button>
-                            <Link
-                                to={`/executions/${runSuccessId}`}
-                                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-                            >
-                                View Live Progress
-                            </Link>
+            {
+                runSuccessId && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center transform transition-all scale-100">
+                            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                                <CheckCircle className="w-6 h-6 text-green-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-800 mb-2">Execution Started!</h3>
+                            <p className="text-sm text-slate-500 mb-6">
+                                The analysis pipeline has been triggered successfully.
+                            </p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setRunSuccessId(null)}
+                                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
+                                >
+                                    Close
+                                </button>
+                                <Link
+                                    to={`/executions/${runSuccessId}`}
+                                    className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                                >
+                                    View Live Progress
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };

@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 import uuid
 
 from app.api import deps
-from app.db.models import Execution, ExecutionStatus, Document
+from app.db.models import Execution, ExecutionStatus, Document, Version
 from app.services.pipeline import PipelineService
 from app.db.session import AsyncSessionLocal
 
@@ -47,7 +47,14 @@ async def list_executions(
     limit: int = 20,
     session: AsyncSession = Depends(deps.get_session)
 ):
-    stmt = select(Execution).order_by(desc(Execution.start_time)).offset(skip).limit(limit)
+    from sqlalchemy.orm import selectinload
+    stmt = (
+        select(Execution)
+        .options(selectinload(Execution.versions).selectinload(Version.document))
+        .order_by(desc(Execution.start_time))
+        .offset(skip)
+        .limit(limit)
+    )
     result = await session.execute(stmt)
     return result.scalars().all()
 

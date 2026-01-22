@@ -29,9 +29,28 @@ export const ExecutionsList: React.FC = () => {
                                                 exec.status === 'failed' ? <AlertTriangle className="w-5 h-5" /> :
                                                     <Activity className="w-5 h-5" />}
                                         </div>
-                                        <div>
-                                            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">{exec.status}</h3>
-                                            <p className="text-xs text-slate-500 mt-1 font-mono">{exec.id}</p>
+                                        <div className="flex-1 min-w-0 ml-4">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">{exec.status}</h3>
+                                                <span className="text-xs font-mono text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-100">
+                                                    {exec.id.substring(0, 8)}
+                                                </span>
+                                            </div>
+
+                                            {/* Targets Display */}
+                                            <div className="mt-1 flex flex-wrap gap-2 items-center">
+                                                {exec.targets && exec.targets.length > 0 ? (
+                                                    exec.targets.map(t => (
+                                                        <div key={t.id} className="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                                            <span className="font-medium text-slate-800">{t.application_name}</span>
+                                                            <span className="text-slate-400">•</span>
+                                                            <span className="truncate max-w-[200px]">{t.document_name}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-xs text-slate-400 italic">No targets (Pending or System)</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 

@@ -56,3 +56,18 @@ class Execution(Base):
     steps: Mapped[Optional[List[dict]]] = mapped_column(JSONB, default=[])
     
     versions: Mapped[List["Version"]] = relationship("Version", back_populates="execution")
+
+    @property
+    def targets(self) -> List[dict]:
+        seen = set()
+        targets = []
+        for v in self.versions:
+            if v.document and v.document_id not in seen:
+                seen.add(v.document_id)
+                targets.append({
+                    "id": v.document.id,
+                    "application_name": v.document.application_name,
+                    "document_name": v.document.name,
+                    "url": v.document.url
+                })
+        return targets
