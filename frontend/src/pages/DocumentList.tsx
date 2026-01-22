@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { documentsApi } from '../api/client';
 import { ExternalLink, Calendar, MoreHorizontal, FileText, GitCompare } from 'lucide-react';
 import { format } from 'date-fns';
@@ -13,6 +13,30 @@ const ButtonLink = ({ to, children }: { to: string, children: React.ReactNode })
 
 export const DocumentList: React.FC = () => {
     const { data: docs, isLoading } = useQuery({ queryKey: ['documents'], queryFn: () => documentsApi.list().then(r => r.data) });
+
+    // Mutation for Quick Run
+    const runMutation = React.useMemo(() => {
+        // Can't use hook directly inside callback easily, so we can use existing api client directly or simple logic
+        // But better to use proper mutation for feedback
+        // We will add it inside the component
+        return null;
+    }, []);
+
+    // We need state for loading specific document run
+    const [runningDocId, setRunningDocId] = React.useState<string | null>(null);
+
+    const handleRun = async (docId: string) => {
+        setRunningDocId(docId);
+        try {
+            await executionsApi.run(docId);
+            alert("Run triggered successfully");
+        } catch (e) {
+            console.error(e);
+            alert("Failed to run");
+        } finally {
+            setRunningDocId(null);
+        }
+    }
 
     if (isLoading) return <div className="p-8 text-center text-slate-500">Loading documents...</div>;
 
@@ -68,13 +92,12 @@ export const DocumentList: React.FC = () => {
                                         {format(new Date(doc.created_at), 'MMM d, yyyy')}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                    <RunButton docId={doc.id} />
+                                    <DeleteButton docId={doc.id} onSuccess={() => window.location.reload()} />
                                     <ButtonLink to={`/documents/${doc.id}/compare`}>
                                         <GitCompare className="w-4 h-4" />
                                     </ButtonLink>
-                                    <button className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-200 rounded-full transition-colors opacity-0 group-hover:opacity-100">
-                                        <MoreHorizontal className="w-5 h-5" />
-                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -91,3 +114,67 @@ export const DocumentList: React.FC = () => {
         </div>
     );
 };
+
+import { Play } from 'lucide-react';
+import { executionsApi } from '../api/client';
+// useMutation is already imported from @tanstack/react-query
+
+const RunButton = ({ docId }: { docId: string }) => {
+    const role = localStorage.getItem('user_role') || 'admin';
+    const canRun = ['admin', 'manager'].includes(role);
+
+    const mutation = useMutation({
+        mutationFn: () => executionsApi.run(docId),
+        onSuccess: () => alert('Run triggered'),
+        onError: () => alert('Run failed')
+    });
+
+    if (!canRun) return null;
+
+    return (
+        <button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+            className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors"
+            title="Run Analysis Now"
+        >
+            {mutation.isPending ? (
+                <span className="block w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+            ) : (
+                <Play className="w-4 h-4" />
+            )}
+        </button>
+    )
+}
+
+import { Trash2 } from 'lucide-react';
+const DeleteButton = ({ docId, onSuccess }: { docId: string, onSuccess: () => void }) => {
+    const role = localStorage.getItem('user_role') || 'admin';
+    const canDelete = role === 'admin';
+
+    const mutation = useMutation({
+        mutationFn: () => documentsApi.delete(docId),
+        onSuccess: () => {
+            alert('Document deleted');
+            onSuccess();
+        },
+        onError: () => alert('Failed to delete document')
+    });
+
+    if (!canDelete) return null;
+
+    return (
+        <button
+            onClick={() => {
+                if (window.confirm('Are you sure you want to delete this document?')) {
+                    mutation.mutate();
+                }
+            }}
+            disabled={mutation.isPending}
+            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+            title="Delete Document"
+        >
+            <Trash2 className="w-4 h-4" />
+        </button>
+    )
+}

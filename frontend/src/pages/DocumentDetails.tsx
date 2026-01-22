@@ -104,7 +104,7 @@ export const DocumentDetails: React.FC = () => {
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${(v.semantic_score || 0) > 0.8 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                                             }`}>
-                                            Sim: {(v.semantic_score || 0).toFixed(4)}
+                                            Sim: {((v.semantic_score || 0) * 100).toFixed(2)}%
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">

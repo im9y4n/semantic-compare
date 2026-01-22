@@ -8,6 +8,14 @@ const api = axios.create({
     },
 });
 
+api.interceptors.request.use((config) => {
+    // For local testing with the new mock backend logic:
+    // We send the 'role' name as the Bearer token, which the backend mock logic interprets
+    const token = localStorage.getItem('user_role') || 'admin';
+    config.headers['Authorization'] = `Bearer ${token}`;
+    return config;
+});
+
 export interface Stats {
     documents_count: number;
     executions_count: number;
@@ -16,7 +24,7 @@ export interface Stats {
 }
 
 export const executionsApi = {
-    run: () => api.post<{ execution_id: string }>('/executions/run'),
+    run: (docId?: string) => api.post<{ execution_id: string }>(`/executions/run${docId ? `?document_id=${docId}` : ''}`),
     list: () => api.get<Execution[]>('/executions'),
 };
 
@@ -29,6 +37,7 @@ export const documentsApi = {
     list: () => api.get<Document[]>('/documents'),
     get: (id: string) => api.get<Document>(`/documents/${id}`),
     create: (data: any) => api.post('/documents', data),
+    delete: (id: string) => api.delete(`/documents/${id}`),
     getVersions: (id: string) => api.get<any[]>(`/documents/${id}/versions`),
 };
 

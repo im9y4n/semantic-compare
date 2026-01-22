@@ -68,26 +68,7 @@ export const Dashboard: React.FC = () => {
             </div>
 
             {/* Action / Context Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Quick Actions */}
-                <div className="p-6 rounded-2xl border border-slate-100 bg-white shadow-soft">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => runMutation.mutate()}
-                            disabled={runMutation.isPending}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 font-medium text-sm"
-                        >
-                            {runMutation.isPending ? (
-                                <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <Play className="w-4 h-4 fill-current" />
-                            )}
-                            Run Pipeline Now
-                        </button>
-                    </div>
-                </div>
-
+            <div className="grid grid-cols-1 gap-8">
                 {/* Recent Executions List */}
                 <div className="p-6 rounded-2xl border border-slate-100 bg-white shadow-soft">
                     <h3 className="text-lg font-bold text-slate-800 mb-4">Recent Executions</h3>

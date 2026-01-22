@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadminpassword"
 
+    # Authentication
+    USERINFO_URL: str = "http://dummy-userinfo/userinfo"
+    AD_GROUP_MAPPING: dict = {
+        "CN=GraphIntell_Admins,OU=Groups,DC=example,DC=com": "admin",
+        "CN=GraphIntell_Managers,OU=Groups,DC=example,DC=com": "manager",
+        "CN=GraphIntell_Users,OU=Groups,DC=example,DC=com": "viewer"
+    }
+
     model_config = SettingsConfigDict(case_sensitive=True, env_file=".env")
 
 settings = Settings()

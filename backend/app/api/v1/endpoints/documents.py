@@ -39,7 +39,8 @@ async def get_document(
 async def create_document(
     doc_in: DocumentConfig,
     background_tasks: BackgroundTasks,
-    session: AsyncSession = Depends(deps.get_session)
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER]))
 ):
     # Check if document already exists
     stmt = select(Document).where(
@@ -106,3 +107,20 @@ async def get_document_versions(
     result = await session.execute(stmt)
     versions = result.scalars().all()
     return versions
+
+from app.core.security import Role
+@router.delete("/{id}", status_code=204, dependencies=[Depends(deps.check_permissions([Role.ADMIN]))])
+async def delete_document(
+    id: str,
+    session: AsyncSession = Depends(deps.get_session)
+):
+    """
+    Delete a document. Only for ADMINs.
+    """
+    doc = await session.get(Document, id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    await session.delete(doc)
+    await session.commit()
+    return None

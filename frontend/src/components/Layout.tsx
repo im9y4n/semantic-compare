@@ -48,25 +48,25 @@ export const Layout: React.FC = () => {
                     <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
                     <NavItem to="/documents" icon={FileText} label="Documents" />
                     <NavItem to="/executions" icon={Activity} label="Executions" />
-
-                    <div className="mt-8 px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        History
-                    </div>
-                    <div className="px-2 space-y-1">
-                        {/* Mock history items */}
-                        <button className="w-full text-left flex items-center px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg truncate">
-                            <Clock className="w-4 h-4 mr-3 opacity-50" />
-                            Medical Policy Update
-                        </button>
-                        <button className="w-full text-left flex items-center px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg truncate">
-                            <Clock className="w-4 h-4 mr-3 opacity-50" />
-                            Privacy Notice Q1
-                        </button>
-                    </div>
                 </nav>
 
                 {/* User / Settings Footer */}
                 <div className="p-3 border-t bg-slate-50">
+                    <div className="mb-2 px-1">
+                        <select
+                            className="w-full text-xs border-slate-200 rounded-md bg-white text-slate-600 focus:ring-primary-100 focus:border-primary-300"
+                            value={localStorage.getItem('user_role') || 'admin'}
+                            onChange={(e) => {
+                                localStorage.setItem('user_role', e.target.value);
+                                window.location.reload();
+                            }}
+                        >
+                            <option value="admin">Role: Admin</option>
+                            <option value="manager">Role: Manager</option>
+                            <option value="owner">Role: Owner</option>
+                            <option value="viewer">Role: Viewer</option>
+                        </select>
+                    </div>
                     <NavItem to="/settings" icon={Settings} label="Settings" />
                     <div className="mt-2 flex items-center px-3 py-2">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
@@ -74,7 +74,7 @@ export const Layout: React.FC = () => {
                         </div>
                         <div className="ml-3">
                             <p className="text-sm font-medium text-slate-900">John Doe</p>
-                            <p className="text-xs text-slate-500">Admin</p>
+                            <p className="text-xs text-slate-500 capitalize">{localStorage.getItem('user_role') || 'admin'}</p>
                         </div>
                     </div>
                 </div>

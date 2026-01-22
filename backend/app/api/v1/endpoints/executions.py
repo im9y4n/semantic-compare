@@ -16,8 +16,9 @@ from app.core.tasks import run_pipeline_task
 @router.post("/run", status_code=202)
 async def trigger_run(
     document_id: Optional[uuid.UUID] = None,
-    background_tasks: BackgroundTasks = None, # Make optional to fix potential DI issue if not passed, though FastAPI handles it
-    session: AsyncSession = Depends(deps.get_session)
+    background_tasks: BackgroundTasks = None, 
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER]))
 ):
     """
     Trigger an on-demand execution. Optionally filter by document_id.
