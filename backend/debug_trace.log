@@ -351,3 +351,8 @@
 [EXTRACTOR] 2026-01-22 14:01:36.934662 - PDF Opened. Total pages: 1
 [BRIDGE] Extracting page 1/1...
 [BRIDGE] Update Success
+[EXTRACTOR] 2026-01-22 14:11:02.459445 - Entered extract_from_pdf
+[EXTRACTOR] 2026-01-22 14:11:02.459672 - Opening PDF content (size: 7646)
+[EXTRACTOR] 2026-01-22 14:11:02.460492 - PDF Opened. Total pages: 1
+[BRIDGE] Extracting page 1/1...
+[BRIDGE] Update Success

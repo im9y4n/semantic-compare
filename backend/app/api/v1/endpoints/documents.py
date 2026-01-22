@@ -73,7 +73,9 @@ async def create_document(
             url=str(doc_in.url),
             keywords=doc_in.keywords,
             schedule=doc_in.schedule,
-            owner_id=current_user.id
+            owner_id=current_user.id,
+            owner_email=current_user.email,
+            owner_username=current_user.username
         )
         session.add(doc)
         await session.commit()

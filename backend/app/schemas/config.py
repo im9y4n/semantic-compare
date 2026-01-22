@@ -21,6 +21,8 @@ class DocumentResponse(BaseModel):
     keywords: Optional[List[str]] = []
     schedule: Optional[str]
     owner_id: Optional[str] = None
+    owner_email: Optional[str] = None
+    owner_username: Optional[str] = None
     created_at: Optional[Any] = None
     latest_execution_id: Optional[UUID] = None
 

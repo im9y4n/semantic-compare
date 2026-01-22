@@ -82,9 +82,19 @@ export const DocumentList: React.FC = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                                        {doc.application_name}
-                                    </span>
+                                    <div className="flex flex-col gap-1">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 w-fit">
+                                            {doc.application_name}
+                                        </span>
+                                        {doc.owner_username && (
+                                            <div className="text-xs text-slate-500 flex items-center gap-1 group/user relative cursor-help">
+                                                <span className="font-medium">by {doc.owner_username}</span>
+                                                <div className="absolute bottom-full left-0 mb-2 hidden group-hover/user:block px-2 py-1 bg-slate-800 text-white text-xs rounded shadow-lg whitespace-nowrap z-10">
+                                                    {doc.owner_email}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center text-sm text-slate-500">

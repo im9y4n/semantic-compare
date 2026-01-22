@@ -12,6 +12,7 @@ class Role(str, Enum):
 class User(BaseModel):
     id: str = "user-123"
     username: str = "default_user"
+    email: str = "user@example.com"
     role: Role = Role.VIEWER
     groups: List[str] = []
 
@@ -45,27 +46,37 @@ async def get_current_user(
         if token == "admin":
              user_info = {
                  "sub": "user-admin", 
+                 "preferred_username": "admin_user",
+                 "email": "admin@example.com",
                  "groups": ["CN=GraphIntell_Admins,OU=Groups,DC=example,DC=com"]
              }
         elif token == "manager":
              user_info = {
                  "sub": "user-manager", 
+                 "preferred_username": "manager_user",
+                 "email": "manager@example.com",
                  "groups": ["CN=GraphIntell_Managers,OU=Groups,DC=example,DC=com"]
              }
         elif token == "owner":
              user_info = {
                  "sub": "user-owner", 
+                 "preferred_username": "owner_user",
+                 "email": "owner@example.com",
                  "groups": ["CN=GraphIntell_Owners,OU=Groups,DC=example,DC=com"]
              }
         elif token == "viewer":
              user_info = {
                  "sub": "user-viewer", 
+                 "preferred_username": "viewer_user",
+                 "email": "viewer@example.com",
                  "groups": ["CN=GraphIntell_Users,OU=Groups,DC=example,DC=com"]
              }
         else:
              # Default fallback or error
              user_info = {
                  "sub": "user-guest", 
+                 "preferred_username": "guest_user",
+                 "email": "guest@example.com",
                  "groups": []
              }
     else:
@@ -114,6 +125,7 @@ async def get_current_user(
     return User(
         id=user_info.get("sub", "unknown"),
         username=user_info.get("preferred_username", "unknown"),
+        email=user_info.get("email", "unknown@example.com"),
         role=assigned_role,
         groups=groups
     )
