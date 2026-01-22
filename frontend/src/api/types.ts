@@ -1,5 +1,6 @@
 export interface Document {
     id: string;
+    latest_execution_id?: string;
     application_name: string;
     name: string;
     url: string;
@@ -39,4 +40,15 @@ export interface ConfigImport {
         url: string;
         schedule?: string;
     }[];
+}
+
+export interface KeywordMatch {
+    page: number;
+    keyword: string;
+    text: string;
+}
+
+export interface KeywordMatchResponse {
+    matches: KeywordMatch[];
+    keywords: string[];
 }

@@ -82,7 +82,8 @@ async def create_document(
     
     background_tasks.add_task(run_pipeline_task, execution.id, [doc.id])
     
-    # Manual mapping to schema if needed, but Pydantic should handle it
+    # Manually attach execution ID to response
+    doc.latest_execution_id = execution.id
     return doc
 
 from app.schemas.config import DocumentConfig, DocumentResponse, VersionSchema

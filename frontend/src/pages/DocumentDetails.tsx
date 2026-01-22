@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { documentsApi } from '../api/client';
-import { ArrowLeft, Database, HardDrive, FileCode, Clock } from 'lucide-react';
+import { ArrowLeft, Database, HardDrive, FileCode, Clock, Search } from 'lucide-react';
 import { format } from 'date-fns';
 
 export const DocumentDetails: React.FC = () => {
@@ -112,17 +112,26 @@ export const DocumentDetails: React.FC = () => {
                                             <div className="text-xs font-mono text-slate-500 break-all">
                                                 <span className="text-orange-500 font-bold">JSON:</span> {v.extracted_text_path}
                                             </div>
-                                            {v.execution_id && (
-                                                <div>
+                                            <div className="flex gap-2">
+                                                {v.extracted_text_path && (
+                                                    <Link
+                                                        to={`/documents/${id}/versions/${v.id}/matches`}
+                                                        className="inline-flex items-center gap-1.5 px-2 py-1 bg-yellow-50 text-yellow-700 rounded-md text-xs font-medium hover:bg-yellow-100 transition-colors border border-yellow-200"
+                                                    >
+                                                        <Search className="w-3 h-3" />
+                                                        View Hits
+                                                    </Link>
+                                                )}
+                                                {v.execution_id && (
                                                     <Link
                                                         to={`/executions/${v.execution_id}`}
-                                                        className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-medium hover:bg-blue-100 transition-colors"
+                                                        className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-medium hover:bg-blue-100 transition-colors border border-blue-200"
                                                     >
                                                         <Clock className="w-3 h-3" />
-                                                        View Execution Log
+                                                        Execution Log
                                                     </Link>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

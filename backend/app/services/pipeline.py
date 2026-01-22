@@ -24,49 +24,60 @@ class PipelineService:
         self.extractor = TextExtractor()
         self.normalizer = TextNormalizer()
         self.analysis = AnalysisEngine()
+        self._lock = asyncio.Lock()
 
 
-    async def _update_step(self, execution_id: uuid.UUID, step_name: str, status: str, details: str = None):
+    async def _update_step(self, execution_id: uuid.UUID, step_name: str, status: str, details: str = None, log_msg: str = None):
         """Helper to update a specific step in the execution record."""
         # Note: This requires fetching, modifying, and saving the execution.
         # Check if we have an active session for this, or use the main session.
         if not execution_id:
             return
 
-        stmt = select(Execution).where(Execution.id == execution_id)
-        result = await self.session.execute(stmt)
-        execution = result.scalar_one_or_none()
-        
-        if execution:
-            current_steps = list(execution.steps) if execution.steps else []
+        async with self._lock:
+            stmt = select(Execution).where(Execution.id == execution_id)
+            result = await self.session.execute(stmt)
+            execution = result.scalar_one_or_none()
             
-            # Find or append
-            found = False
-            for step in current_steps:
-                if step["name"] == step_name:
-                    step["status"] = status
+            if execution:
+                logger.info(f"Updating step {step_name} -> {status} (Details: {details})")
+                
+                # Append to main logs if requested
+                if log_msg:
+                    timestamp = datetime.utcnow().strftime("%H:%M:%S")
+                    prefix = f"[{timestamp}] [{step_name}]"
+                    new_entry = f"{prefix} {log_msg}\n"
+                    execution.logs = (execution.logs or "") + new_entry
+
+                current_steps = list(execution.steps) if execution.steps else []
+                
+                # Find or append
+                found = False
+                for step in current_steps:
+                    if step["name"] == step_name:
+                        step["status"] = status
+                        if details:
+                            step["details"] = details
+                        if status == "running" and not step.get("start_time"):
+                            step["start_time"] = datetime.utcnow().isoformat()
+                        if status in ["completed", "failed"]:
+                            step["end_time"] = datetime.utcnow().isoformat()
+                        found = True
+                        break
+                
+                if not found:
+                    new_step = {
+                        "name": step_name, 
+                        "status": status, 
+                        "start_time": datetime.utcnow().isoformat() if status == "running" else None
+                    }
                     if details:
-                        step["details"] = details
-                    if status == "running" and not step.get("start_time"):
-                        step["start_time"] = datetime.utcnow().isoformat()
-                    if status in ["completed", "failed"]:
-                        step["end_time"] = datetime.utcnow().isoformat()
-                    found = True
-                    break
-            
-            if not found:
-                new_step = {
-                    "name": step_name, 
-                    "status": status, 
-                    "start_time": datetime.utcnow().isoformat() if status == "running" else None
-                }
-                if details:
-                    new_step["details"] = details
-                current_steps.append(new_step)
-            
-            # Force update (SQLAlchemy sometimes doesn't detect JSON mutation)
-            execution.steps = list(current_steps) 
-            await self.session.commit()
+                        new_step["details"] = details
+                    current_steps.append(new_step)
+                
+                # Force update (SQLAlchemy sometimes doesn't detect JSON mutation)
+                execution.steps = list(current_steps) 
+                await self.session.commit()
 
     async def process_document(self, document_id: uuid.UUID, execution_id: uuid.UUID = None):
         logger.info(f"Processing document {document_id}")
@@ -104,10 +115,28 @@ class PipelineService:
         
         try:
             if "pdf" in content_type:
+                def progress_bridge(msg):
+                    # Bridge to async loop
+                    with open("debug_trace.log", "a") as f:
+                        f.write(f"[BRIDGE] {msg}\n")
+                    
+                    if execution_id:
+                        future = asyncio.run_coroutine_threadsafe(
+                             self._update_step(execution_id, "Extraction", "running", msg, log_msg=msg),
+                             loop
+                        )
+                        def log_error(f):
+                            try:
+                                f.result()
+                                with open("debug_trace.log", "a") as log: log.write("[BRIDGE] Update Success\n")
+                            except Exception as e:
+                                with open("debug_trace.log", "a") as log: log.write(f"[BRIDGE] Update FAILED: {e}\n")
+                        future.add_done_callback(log_error)
+
                 # Offload heavy PDF extraction
                 segments = await loop.run_in_executor(
                     None, 
-                    self.extractor.extract_from_pdf, 
+                    functools.partial(self.extractor.extract_from_pdf, progress_callback=progress_bridge), 
                     content
                 )
             else:

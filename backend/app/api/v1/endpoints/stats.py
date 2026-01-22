@@ -18,7 +18,14 @@ async def get_stats(session: AsyncSession = Depends(deps.get_session)):
     execs_stmt = select(func.count(Execution.id))
     execs_count = (await session.execute(execs_stmt)).scalar() or 0
     
-    # Count Recent Versions (last 7 days - simplified to total for now)
+    import datetime
+    
+    # Count Recent Executions (last 24h)
+    cutoff = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+    execs_recent_stmt = select(func.count(Execution.id)).where(Execution.start_time >= cutoff)
+    execs_recent_count = (await session.execute(execs_recent_stmt)).scalar() or 0
+
+    # Count Total Versions
     vers_stmt = select(func.count(Version.id))
     vers_count = (await session.execute(vers_stmt)).scalar() or 0
     
@@ -26,5 +33,6 @@ async def get_stats(session: AsyncSession = Depends(deps.get_session)):
         "documents_count": docs_count,
         "executions_count": execs_count,
         "versions_count": vers_count,
+        "recent_updates_count": execs_recent_count,
         "active_workers": "IDLE" # Placeholder
     }

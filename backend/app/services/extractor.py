@@ -1,19 +1,39 @@
 import pdfplumber
 import io
 import logging
+import datetime
 from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
 class TextExtractor:
-    def extract_from_pdf(self, content: bytes) -> List[Dict[str, Any]]:
+    def extract_from_pdf(self, content: bytes, progress_callback=None) -> List[Dict[str, Any]]:
         """
         Extract text from PDF bytes. Returns a list of segments (paragraphs/pages).
         """
+        def log_debug(msg):
+            with open("debug_trace.log", "a") as f:
+                f.write(f"[EXTRACTOR] {datetime.datetime.utcnow()} - {msg}\n")
+        
+        log_debug("Entered extract_from_pdf")
         segments = []
         try:
+            log_debug(f"Opening PDF content (size: {len(content)})")
             with pdfplumber.open(io.BytesIO(content)) as pdf:
+                total_pages = len(pdf.pages)
+                log_debug(f"PDF Opened. Total pages: {total_pages}")
+                print(f"DEBUG: Extractor started, pages={total_pages}")
                 for i, page in enumerate(pdf.pages):
+                    # Progress log: 
+                    # If < 20 pages, log every page.
+                    # Else log every 10 pages or 10%.
+                    should_log = (total_pages < 20) or (i % 10 == 0) or (i == total_pages - 1)
+                    
+                    if progress_callback and should_log:
+                         print(f"DEBUG: Calling callback for page {i+1}")
+                         progress_callback(f"Extracting page {i+1}/{total_pages}...")
+                    
+                    text = page.extract_text()
                     text = page.extract_text()
                     if text:
                         # Split by paragraphs (double newline)

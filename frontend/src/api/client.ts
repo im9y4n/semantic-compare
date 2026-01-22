@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Document, Execution, ConfigImport } from './types';
+import { Document, Execution, ConfigImport, KeywordMatchResponse } from './types';
 
 const api = axios.create({
     baseURL: 'http://localhost:8000/api/v1',
@@ -20,6 +20,7 @@ export interface Stats {
     documents_count: number;
     executions_count: number;
     versions_count: number;
+    recent_updates_count: number;
     active_workers: string;
 }
 
@@ -44,6 +45,7 @@ export const documentsApi = {
 
 export const versionsApi = {
     getContent: (id: string) => api.get<{ content: string }>(`/versions/${id}/content`),
+    getMatches: (id: string) => api.get<KeywordMatchResponse>(`/versions/${id}/matches`),
 };
 
 export const statsApi = {

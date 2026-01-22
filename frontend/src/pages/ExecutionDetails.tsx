@@ -84,45 +84,66 @@ export const ExecutionDetails = () => {
                     </div>
                 </div>
 
-                <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left: Steps Timeline */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Pipeline Steps</h2>
+                <div className="p-6">
+                    {/* Steps Timeline */}
+                    <div className="space-y-6">
+                        <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Pipeline Progress</h2>
 
                         <div className="relative space-y-0">
                             {/* Vertical Line */}
                             <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-slate-100 -z-10" />
 
-                            {execution.steps?.map((step, idx) => (
-                                <div key={idx} className="flex gap-4 group">
-                                    <div className="relative pt-1">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm ${getStatusColor(step.status)}`}>
-                                            {getStatusIcon(step.status)}
+                            {execution.steps?.map((step, idx) => {
+                                // Filter logs for this step
+                                const stepLogs = execution.logs
+                                    ?.split('\n')
+                                    .filter(line => line.includes(`[${step.name}]`))
+                                    .join('\n');
+
+                                return (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="relative pt-1">
+                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm ${getStatusColor(step.status)}`}>
+                                                {getStatusIcon(step.status)}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="flex-1 pb-8">
-                                        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm group-hover:border-slate-300 transition-all">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <h3 className="font-semibold text-slate-800">{step.name}</h3>
-                                                {step.end_time && (
-                                                    <span className="text-xs text-slate-400 flex items-center gap-1">
-                                                        <Clock className="w-3 h-3" />
-                                                        {new Date(step.end_time).toLocaleTimeString()}
-                                                    </span>
+                                        <div className="flex-1 pb-8">
+                                            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm group-hover:border-slate-300 transition-all">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <h3 className="font-semibold text-slate-800">{step.name}</h3>
+                                                    {step.end_time && (
+                                                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                                                            <Clock className="w-3 h-3" />
+                                                            {new Date(step.end_time).toLocaleTimeString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Details or Active Status */}
+                                                {step.details && (
+                                                    <p className="text-sm text-slate-600 mt-1">{step.details}</p>
+                                                )}
+
+                                                {/* Step-specific Logs (Embedded) */}
+                                                {stepLogs && (step.name === 'Extraction' || step.status === 'failed') && (
+                                                    <div className="mt-3 bg-slate-50 rounded border border-slate-100 p-3 max-h-48 overflow-auto ScrollableLogs">
+                                                        <pre className="text-[10px] text-slate-500 font-mono whitespace-pre-wrap">
+                                                            {stepLogs}
+                                                            {step.status === 'running' && <div ref={(el) => el?.scrollIntoView({ behavior: "smooth" })} />}
+                                                        </pre>
+                                                    </div>
+                                                )}
+
+                                                {step.status === 'running' && (
+                                                    <div className="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-blue-500 animate-progress origin-left" style={{ width: '60%' }}></div>
+                                                    </div>
                                                 )}
                                             </div>
-                                            {step.details && (
-                                                <p className="text-sm text-slate-600 mt-1">{step.details}</p>
-                                            )}
-                                            {step.status === 'running' && (
-                                                <div className="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blue-500 animate-progress origin-left" style={{ width: '60%' }}></div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
 
                             {(!execution.steps || execution.steps.length === 0) && (
                                 <div className="text-center py-12 text-slate-400">
@@ -130,37 +151,6 @@ export const ExecutionDetails = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
-
-                    {/* Right: Metadata & Logs */}
-                    <div className="space-y-6">
-                        <div className="bg-slate-50 rounded-lg p-5 border border-slate-200">
-                            <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                                <FileText className="w-4 h-4" />
-                                Execution Specs
-                            </h3>
-                            <dl className="space-y-3 text-sm">
-                                <div>
-                                    <dt className="text-slate-500">Started</dt>
-                                    <dd className="font-medium text-slate-900">{new Date(execution.start_time).toLocaleString()}</dd>
-                                </div>
-                                {execution.end_time && (
-                                    <div>
-                                        <dt className="text-slate-500">Ended</dt>
-                                        <dd className="font-medium text-slate-900">{new Date(execution.end_time).toLocaleString()}</dd>
-                                    </div>
-                                )}
-                            </dl>
-                        </div>
-
-                        {execution.logs && (
-                            <div className="bg-slate-900 rounded-lg p-4 overflow-hidden">
-                                <h3 className="text-xs font-semibold text-slate-400 uppercase mb-2">System Logs</h3>
-                                <pre className="text-xs text-green-400 font-mono overflow-auto max-h-64 whitespace-pre-wrap">
-                                    {execution.logs}
-                                </pre>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
