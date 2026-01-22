@@ -63,7 +63,14 @@ async def get_execution(
     id: uuid.UUID,
     session: AsyncSession = Depends(deps.get_session)
 ):
-    execution = await session.get(Execution, id)
+    from sqlalchemy.orm import selectinload
+    stmt = (
+        select(Execution)
+        .where(Execution.id == id)
+        .options(selectinload(Execution.versions).selectinload(Version.document))
+    )
+    result = await session.execute(stmt)
+    execution = result.scalar_one_or_none()
     if not execution:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Execution not found")

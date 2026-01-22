@@ -56,6 +56,10 @@ class Settings(BaseSettings):
         "CN=GraphIntell_Users,OU=Groups,DC=example,DC=com": "viewer"
     }
 
+    # Embedding
+    EMBEDDING_PROVIDER: str = "huggingface" # "huggingface" or "google"
+    GOOGLE_API_KEY: Optional[str] = None
+
     model_config = SettingsConfigDict(case_sensitive=True, env_file=".env")
 
 settings = Settings()

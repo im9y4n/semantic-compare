@@ -34,3 +34,5 @@ app = get_application()
 @app.get("/")
 async def root():
     return {"message": "Welcome to Semantic Document Monitor API", "docs": "/docs"}
+
+
