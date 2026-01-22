@@ -2,12 +2,15 @@ import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { documentsApi } from '../api/client';
-import { ArrowLeft, Database, HardDrive, FileCode, Clock, Search } from 'lucide-react';
+import { ArrowLeft, Database, HardDrive, FileCode, Clock, Search, Edit } from 'lucide-react';
 import { format } from 'date-fns';
+import { NewMonitorModal } from '../components/NewMonitorModal';
+import { useState } from 'react';
 
 export const DocumentDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const { data: doc, isLoading: isDocLoading } = useQuery({
         queryKey: ['document', id],
@@ -31,18 +34,38 @@ export const DocumentDetails: React.FC = () => {
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto pb-12">
-            <div className="flex items-center gap-4">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="p-2 -ml-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">{doc.name}</h1>
-                    <p className="text-slate-500 font-mono text-xs">{doc.id}</p>
+            <div className="flex items-center gap-4 justify-between">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="p-2 -ml-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-900">{doc.name}</h1>
+                        <p className="text-slate-500 font-mono text-xs">{doc.id}</p>
+                    </div>
                 </div>
+                <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                    <Edit className="w-4 h-4" />
+                    Edit Monitor
+                </button>
             </div>
+
+            <NewMonitorModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                initialData={{
+                    ...doc,
+                    // Map keys if necessary, but doc structure mostly matches config except readonly fields
+                    document_name: doc.name,
+                    keywords: doc.keywords
+                }}
+            />
 
             {/* Document Metadata Card */}
             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

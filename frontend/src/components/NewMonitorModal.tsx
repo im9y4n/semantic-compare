@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { documentsApi } from '../api/client';
+import { documentsApi, DocumentConfig } from '../api/client';
 import { X, Loader2, Upload, Link, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { CronPicker } from './CronPicker';
 
 interface NewMonitorModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialData?: DocumentConfig & { id: string };
+    onSuccess?: () => void;
 }
 
-export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClose }) => {
+export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClose, initialData, onSuccess }) => {
     const queryClient = useQueryClient();
     const [mode, setMode] = useState<'url' | 'file'>('url');
     const [file, setFile] = useState<File | null>(null);
@@ -21,45 +24,94 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
         schedule: 'weekly'
     });
 
+    // Initialize form with data if provided
+    React.useEffect(() => {
+        if (initialData) {
+            // Robustly map data, handling potential missing keys if types are loose
+            setFormData({
+                application_name: initialData.application_name || '',
+                // Fallback to 'name' if 'document_name' is missing (handle Backend vs Config object differences)
+                document_name: initialData.document_name || (initialData as any).name || '',
+                url: initialData.url || '',
+                keywords: initialData.keywords?.join(', ') || '',
+                schedule: initialData.schedule || 'weekly'
+            });
+            // Auto-detect mode based on URL
+            if (initialData.url && initialData.url.startsWith("internal://")) {
+                setMode('file');
+            } else {
+                setMode('url');
+            }
+        } else {
+            setFormData({ application_name: '', document_name: '', url: '', keywords: '', schedule: 'weekly' });
+        }
+    }, [initialData, isOpen]);
+
     const [successDocId, setSuccessDocId] = useState<string | null>(null);
 
     const mutation = useMutation({
         mutationFn: async (data: any) => {
             // Process keywords
-            const payload = {
+            const keywordList = data.keywords ? data.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0) : [];
+
+            // Base payload creation depends on mode, but let's prepare common fields
+            let payload = {
                 ...data,
-                keywords: data.keywords ? data.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0) : []
+                keywords: keywordList
             };
 
-            if (mode === 'url') {
-                return documentsApi.create(payload);
+            if (initialData) {
+                // UPDATE MODE: Robust Fallback Logic
+                // If the user didn't touch a field (or it's empty), fallback to the original initialData to ensure valid payload
+                payload = {
+                    application_name: data.application_name || initialData.application_name,
+                    // Handle potential schema mismatch (Backend 'name' vs Config 'document_name')
+                    document_name: data.document_name || initialData.document_name || (initialData as any).name,
+                    url: data.url || initialData.url,
+                    schedule: data.schedule || initialData.schedule,
+                    keywords: keywordList.length > 0 ? keywordList : (initialData.keywords || [])
+                };
+
+                // Use the new client method for consistency
+                return documentsApi.update(initialData.id, payload);
             } else {
-                if (!file) throw new Error("No file selected");
+                // CREATE MODE
+                if (mode === 'url') {
+                    return documentsApi.create(payload);
+                } else {
+                    if (!file) throw new Error("No file selected");
 
-                // 1. Upload File
-                const uploadFormData = new FormData();
-                uploadFormData.append('file', file);
-                const uploadRes = await axios.post('http://localhost:8000/api/v1/upload/upload', uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                    // 1. Upload File
+                    const uploadFormData = new FormData();
+                    uploadFormData.append('file', file);
+                    const uploadRes = await axios.post('http://localhost:8000/api/v1/upload/upload', uploadFormData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
 
-                // 2. Create Document with internal URL
-                return documentsApi.create({
-                    ...payload,
-                    url: uploadRes.data.url
-                });
+                    // 2. Create Document with internal URL
+                    return documentsApi.create({
+                        ...payload,
+                        url: uploadRes.data.url
+                    });
+                }
             }
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['documents'] });
             queryClient.invalidateQueries({ queryKey: ['stats'] });
-            // Don't close, show success
-            setSuccessDocId(data.data.latest_execution_id || data.data.id); // Prefer execution ID if available
-            setFormData({ application_name: '', document_name: '', url: '', keywords: '', schedule: 'weekly' });
-            setFile(null);
+            if (initialData) {
+                queryClient.invalidateQueries({ queryKey: ['document', initialData.id] });
+                onSuccess?.();
+                onClose();
+            } else {
+                // Don't close, show success
+                setSuccessDocId(data.data.latest_execution_id || data.data.id);
+                setFormData({ application_name: '', document_name: '', url: '', keywords: '', schedule: 'weekly' });
+                setFile(null);
+            }
         },
         onError: (err: any) => {
-            alert('Failed to create monitor: ' + (err.response?.data?.detail?.[0]?.msg || err.message));
+            alert('Failed to save monitor: ' + (err.response?.data?.detail?.[0]?.msg || err.message));
         }
     });
 
@@ -75,7 +127,7 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all scale-100">
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h2 className="text-lg font-bold text-slate-800">
-                        {successDocId ? 'Monitor Created' : 'Add New Monitor'}
+                        {successDocId ? 'Monitor Created' : (initialData ? 'Edit Monitor' : 'Add New Monitor')}
                     </h2>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
                         <X className="w-5 h-5" />
@@ -193,16 +245,10 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
                             )}
 
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-500 uppercase">Schedule</label>
-                                <select
-                                    value={formData.schedule}
-                                    onChange={e => setFormData({ ...formData, schedule: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
-                                >
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="monthly">Monthly</option>
-                                </select>
+                                <CronPicker
+                                    value={formData.schedule || "weekly"}
+                                    onChange={(val) => setFormData({ ...formData, schedule: val })}
+                                />
                             </div>
 
                             <div className="space-y-1">
@@ -235,7 +281,7 @@ export const NewMonitorModal: React.FC<NewMonitorModalProps> = ({ isOpen, onClos
                                     className="px-6 py-2 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20 disabled:opacity-50 flex items-center gap-2"
                                 >
                                     {mutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                                    Create Monitor
+                                    {initialData ? 'Save Changes' : 'Create Monitor'}
                                 </button>
                             </div>
                         </form>

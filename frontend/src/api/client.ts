@@ -24,6 +24,14 @@ export interface Stats {
     active_workers: string;
 }
 
+export interface DocumentConfig {
+    application_name: string;
+    document_name: string;
+    url: string;
+    keywords?: string[];
+    schedule?: string;
+}
+
 export const executionsApi = {
     run: (docId?: string) => api.post<{ execution_id: string }>(`/executions/run${docId ? `?document_id=${docId}` : ''}`),
     list: () => api.get<Execution[]>('/executions'),
@@ -39,6 +47,7 @@ export const documentsApi = {
     list: () => api.get<Document[]>('/documents'),
     get: (id: string) => api.get<Document>(`/documents/${id}`),
     create: (data: any) => api.post('/documents', data),
+    update: (id: string, data: any) => api.put(`/documents/${id}`, data),
     delete: (id: string) => api.delete(`/documents/${id}`),
     getVersions: (id: string) => api.get<any[]>(`/documents/${id}/versions`),
 };

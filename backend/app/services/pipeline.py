@@ -273,12 +273,8 @@ class PipelineService:
                 logger.error(f"Failed to compute semantic score: {e}", exc_info=True)
                 if execution_id: await self._update_step(execution_id, "Scoring", "failed", str(e))
         
-        with open("debug_trace.log", "a") as f: f.write(f"[DEBUG] Reached Scoring Log. Score: {semantic_score}\n")
         logger.info(f"Completion of Scoring step. Score: {semantic_score}")
         if execution_id: await self._update_step(execution_id, "Scoring", "completed", f"Score: {semantic_score}")
-        
-        # Save Version
-        with open("debug_trace.log", "a") as f: f.write(f"[DEBUG] Saving version\n")
         
         # Save Version in separate session to avoid dirtying/commiting the main session (which holds stale Execution)
         async with AsyncSessionLocal() as version_session:

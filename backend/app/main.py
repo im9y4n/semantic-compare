@@ -19,6 +19,13 @@ def get_application() -> FastAPI:
 
     from app.api.api import api_router
     application.include_router(api_router, prefix=settings.API_V1_STR)
+    
+    @application.on_event("startup")
+    async def startup_event():
+        from app.services.scheduler import SchedulerService
+        scheduler = SchedulerService()
+        scheduler.start()
+        await scheduler.load_jobs()
 
     return application
 

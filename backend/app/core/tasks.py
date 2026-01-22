@@ -26,39 +26,49 @@ async def run_pipeline_task(execution_id: uuid.UUID, document_ids: Optional[List
             result = await session.execute(stmt)
             docs = result.scalars().all()
             
-            # Update execution status
+            # Update execution status or create if not exists (Scheduler case)
             execution = await session.get(Execution, execution_id)
-            if execution:
+            if not execution:
+                print(f"[TASK] Creating NEW execution record {execution_id}")
+                execution = Execution(id=execution_id, status=ExecutionStatus.RUNNING, start_time=datetime.utcnow())
+                session.add(execution)
+            else:
+                print(f"[TASK] Updating existing execution record {execution_id}")
                 execution.status = ExecutionStatus.RUNNING
+            
+            await session.commit()
+            print(f"[TASK] Execution {execution_id} committed.")
+
+            try:
+                for doc in docs:
+                    print(f"[TASK] Processing document {doc.id}")
+                    await pipeline.process_document(doc.id, execution_id)
+                
+                # Direct update to avoid overwriting steps/logs with stale object state
+                stmt = update(Execution).where(Execution.id == execution_id).values(
+                    status=ExecutionStatus.COMPLETED,
+                    end_time=datetime.utcnow()
+                )
+                await session.execute(stmt)
+                await session.commit()
+                print(f"[TASK] Pipeline completed successfully")
+
+            except Exception as e:
+                print(f"[TASK] Pipeline Processing FAILED: {e}")
+                logger.error(f"Pipeline failed: {e}")
+                
+                # Append error to existing logs via concat (Postgres specific) or just update
+                # For safety, we just update status and append to a potentially stale log or just set logs
+                # Ideally we fetch logs first, but direct update is safer for status.
+                stmt = update(Execution).where(Execution.id == execution_id).values(
+                    status=ExecutionStatus.FAILED,
+                    end_time=datetime.utcnow(),
+                    logs=Execution.logs + f"\nError: {str(e)}\n{traceback.format_exc()}"
+                )
+                await session.execute(stmt)
                 await session.commit()
                 
-                try:
-                    for doc in docs:
-                        await pipeline.process_document(doc.id, execution_id)
-                    
-                    # Direct update to avoid overwriting steps/logs with stale object state
-                    stmt = update(Execution).where(Execution.id == execution_id).values(
-                        status=ExecutionStatus.COMPLETED,
-                        end_time=datetime.utcnow()
-                    )
-                    await session.execute(stmt)
-                    await session.commit()
-
-                except Exception as e:
-                    logger.error(f"Pipeline failed: {e}")
-                    
-                    # Append error to existing logs via concat (Postgres specific) or just update
-                    # For safety, we just update status and append to a potentially stale log or just set logs
-                    # Ideally we fetch logs first, but direct update is safer for status.
-                    stmt = update(Execution).where(Execution.id == execution_id).values(
-                        status=ExecutionStatus.FAILED,
-                        end_time=datetime.utcnow(),
-                        logs=Execution.logs + f"\nError: {str(e)}\n{traceback.format_exc()}"
-                    )
-                    await session.execute(stmt)
-                    await session.commit()
-                    
-                    raise e
+                raise e
         except Exception as e:
             logger.error(f"Critical task failure: {e}")
             try:

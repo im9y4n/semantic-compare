@@ -80,10 +80,52 @@ async def create_document(
     await session.commit()
     await session.refresh(execution)
     
+    # Schedule the document
+    from app.services.scheduler import SchedulerService
+    try:
+        SchedulerService().schedule_document(doc)
+    except Exception as e:
+        # Don't fail the request if scheduling fails, just log it
+        print(f"Failed to schedule document: {e}")
+
     background_tasks.add_task(run_pipeline_task, execution.id, [doc.id])
     
     # Manually attach execution ID to response
     doc.latest_execution_id = execution.id
+    return doc
+
+@router.put("/{id}", response_model=DocumentResponse)
+async def update_document(
+    id: str,
+    doc_in: DocumentConfig,
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: Any = Depends(deps.check_permissions([deps.Role.ADMIN, deps.Role.MANAGER]))
+):
+    """
+    Update a document's configuration.
+    """
+    doc = await session.get(Document, id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    doc.application_name = doc_in.application_name
+    # Don't update name if it maps to document_name, keep simple for now
+    doc.name = doc_in.document_name
+    doc.url = str(doc_in.url)
+    doc.keywords = doc_in.keywords
+    doc.schedule = doc_in.schedule
+    
+    session.add(doc)
+    await session.commit()
+    await session.refresh(doc)
+    
+    # Update Scheduler
+    from app.services.scheduler import SchedulerService
+    try:
+        SchedulerService().schedule_document(doc)
+    except Exception as e:
+        print(f"Failed to update schedule: {e}")
+        
     return doc
 
 from app.schemas.config import DocumentConfig, DocumentResponse, VersionSchema
@@ -126,4 +168,11 @@ async def delete_document(
         
     await session.delete(doc)
     await session.commit()
+    await session.delete(doc)
+    await session.commit()
+    
+    # Remove from scheduler
+    from app.services.scheduler import SchedulerService
+    SchedulerService().unschedule_document(doc.id)
+    
     return None

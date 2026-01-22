@@ -21,6 +21,7 @@ class DocumentResponse(BaseModel):
     keywords: Optional[List[str]] = []
     schedule: Optional[str]
     created_at: Optional[Any] = None
+    latest_execution_id: Optional[UUID] = None
 
     class Config:
         from_attributes = True
