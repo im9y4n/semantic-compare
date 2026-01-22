@@ -3,8 +3,10 @@ import json
 import logging
 import asyncio
 import functools
+import copy
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.session import AsyncSessionLocal
 from sqlalchemy import select, desc
 
 from app.db.models import Document, Version, Execution
@@ -35,49 +37,59 @@ class PipelineService:
             return
 
         async with self._lock:
-            stmt = select(Execution).where(Execution.id == execution_id)
-            result = await self.session.execute(stmt)
-            execution = result.scalar_one_or_none()
-            
-            if execution:
-                logger.info(f"Updating step {step_name} -> {status} (Details: {details})")
+            # Use a separate session for status updates to avoid transaction conflicts with main flow
+            async with AsyncSessionLocal() as status_session:
+                # Lock the row to prevent race conditions during read-modify-write of JSONB
+                stmt = select(Execution).where(Execution.id == execution_id).with_for_update()
+                result = await status_session.execute(stmt)
+                execution = result.scalar_one_or_none()
                 
-                # Append to main logs if requested
-                if log_msg:
-                    timestamp = datetime.utcnow().strftime("%H:%M:%S")
-                    prefix = f"[{timestamp}] [{step_name}]"
-                    new_entry = f"{prefix} {log_msg}\n"
-                    execution.logs = (execution.logs or "") + new_entry
+                if execution:
+                    logger.info(f"Updating step {step_name} -> {status} (Details: {details})")
+                    
+                    # Append to main logs if requested
+                    if log_msg:
+                        timestamp = datetime.utcnow().strftime("%H:%M:%S")
+                        prefix = f"[{timestamp}] [{step_name}]"
+                        new_entry = f"{prefix} {log_msg}\n"
+                        execution.logs = (execution.logs or "") + new_entry
 
-                current_steps = list(execution.steps) if execution.steps else []
-                
-                # Find or append
-                found = False
-                for step in current_steps:
-                    if step["name"] == step_name:
-                        step["status"] = status
+                    if log_msg:
+                        timestamp = datetime.utcnow().strftime("%H:%M:%S")
+                        prefix = f"[{timestamp}] [{step_name}]"
+                        new_entry = f"{prefix} {log_msg}\n"
+                        execution.logs = (execution.logs or "") + new_entry
+
+                    # Deepcopy to ensure SQLAlchemy detects the mutation to the JSON structure
+                    current_steps = copy.deepcopy(list(execution.steps)) if execution.steps else []
+                    
+                    # Find or append
+                    found = False
+                    for step in current_steps:
+                        if step["name"] == step_name:
+                            step["status"] = status
+                            if details:
+                                step["details"] = details
+                            if status == "running" and not step.get("start_time"):
+                                step["start_time"] = datetime.utcnow().isoformat()
+                            if status in ["completed", "failed"]:
+                                step["end_time"] = datetime.utcnow().isoformat()
+                            found = True
+                            break
+                    
+                    if not found:
+                        new_step = {
+                            "name": step_name, 
+                            "status": status, 
+                            "start_time": datetime.utcnow().isoformat() if status == "running" else None
+                        }
                         if details:
-                            step["details"] = details
-                        if status == "running" and not step.get("start_time"):
-                            step["start_time"] = datetime.utcnow().isoformat()
-                        if status in ["completed", "failed"]:
-                            step["end_time"] = datetime.utcnow().isoformat()
-                        found = True
-                        break
-                
-                if not found:
-                    new_step = {
-                        "name": step_name, 
-                        "status": status, 
-                        "start_time": datetime.utcnow().isoformat() if status == "running" else None
-                    }
-                    if details:
-                        new_step["details"] = details
-                    current_steps.append(new_step)
-                
-                # Force update (SQLAlchemy sometimes doesn't detect JSON mutation)
-                execution.steps = list(current_steps) 
-                await self.session.commit()
+                            new_step["details"] = details
+                        current_steps.append(new_step)
+                    
+                    # Force update (SQLAlchemy sometimes doesn't detect JSON mutation)
+                    execution.steps = list(current_steps) 
+                    await status_session.commit()
 
     async def process_document(self, document_id: uuid.UUID, execution_id: uuid.UUID = None):
         logger.info(f"Processing document {document_id}")
@@ -243,32 +255,43 @@ class PipelineService:
                 prev_emb_content = await self.storage.download(prev_version.embeddings_path)
                 if prev_emb_content:
                     prev_embeddings = json.loads(prev_emb_content)
+                    logger.info(f"Loaded previous embeddings: {len(prev_embeddings)} segments")
                     
                     if embeddings and prev_embeddings:
                          # Calculate mean embedding for document-level comparison
                          # (Averaging all segment embeddings into one vector)
                          import numpy as np
+                         logger.info("Computing current mean...")
                          curr_mean = np.mean(embeddings, axis=0).tolist()
+                         logger.info("Computing previous mean...")
                          prev_mean = np.mean(prev_embeddings, axis=0).tolist()
                          
+                         logger.info("Computing cosine similarity...")
                          semantic_score = self.analysis.compute_semantic_similarity(curr_mean, prev_mean)
+                         logger.info(f"Similarity computed: {semantic_score}")
             except Exception as e:
-                logger.warning(f"Failed to compute semantic score: {e}")
+                logger.error(f"Failed to compute semantic score: {e}", exc_info=True)
                 if execution_id: await self._update_step(execution_id, "Scoring", "failed", str(e))
-
+        
+        with open("debug_trace.log", "a") as f: f.write(f"[DEBUG] Reached Scoring Log. Score: {semantic_score}\n")
+        logger.info(f"Completion of Scoring step. Score: {semantic_score}")
         if execution_id: await self._update_step(execution_id, "Scoring", "completed", f"Score: {semantic_score}")
         
         # Save Version
-        version = Version(
-            document_id=document_id,
-            gcs_path=f"{base_path}/original.pdf",
-            content_hash=str(hash(extracted_json)), # Simple hash
-            semantic_score=semantic_score,
-            execution_id=execution_id,
-            extracted_text_path=f"{base_path}/extracted.json",
-            embeddings_path=embeddings_path
-        )
-        self.session.add(version)
-        await self.session.commit()
+        with open("debug_trace.log", "a") as f: f.write(f"[DEBUG] Saving version\n")
         
-        logger.info(f"Processed document {document_id}, created version {version.id}")
+        # Save Version in separate session to avoid dirtying/commiting the main session (which holds stale Execution)
+        async with AsyncSessionLocal() as version_session:
+            version = Version(
+                document_id=document_id,
+                gcs_path=f"{base_path}/original.pdf",
+                content_hash=str(hash(extracted_json)), # Simple hash
+                semantic_score=semantic_score,
+                execution_id=execution_id,
+                extracted_text_path=f"{base_path}/extracted.json",
+                embeddings_path=embeddings_path
+            )
+            version_session.add(version)
+            await version_session.commit()
+        
+        logger.info(f"Processed document {document_id}, created version")
